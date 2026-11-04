@@ -85,7 +85,8 @@ class SUN397Dataset(Dataset):
         if self.transform is not None and self.transform is callable:
             arr = self.transform(arr)
 
-        return (arr, label)
+
+        return (transforms.ToTensor().__call__(arr), label)
 
 class CNN(nn.Module):
     """
