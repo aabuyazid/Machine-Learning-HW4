@@ -85,7 +85,6 @@ class SUN397Dataset(Dataset):
         if self.transform is not None and self.transform is callable:
             arr = self.transform(arr)
 
-
         return (transforms.ToTensor().__call__(arr), label)
 
 class CNN(nn.Module):
@@ -119,6 +118,7 @@ def calculate_mean_std(**kwargs):
     Fill in the per channel mean and standard deviation of the dataset. 
     Just fill in the values, no need to compute them.
     """
+    print(kwargs)
     # return [mean_r, mean_g, mean_b], [std_r, std_g, std_b]
     pass
 
