@@ -42,8 +42,6 @@ class SUN397Dataset(Dataset):
                 item = ( os.path.abspath(os.path.join(curr_dir_path, f)), torch.tensor(i) )
                 self.data.append(item)
 
-
-
     def __init__(self, data_dir, transform=None):
         """
         Initializes the dataset with images and labels.
@@ -65,7 +63,7 @@ class SUN397Dataset(Dataset):
 
         return len(self.data)
     
-    def __getitem__(self, idx):
+    def __getitem__(self, idx) -> tuple[torch.Tensor, torch.Tensor]:
         """
         Retrieves an image and its label at the specified index.
         
@@ -86,6 +84,8 @@ class SUN397Dataset(Dataset):
             arr = self.transform(arr)
 
         return (transforms.ToTensor().__call__(arr), label)
+
+
 
 class CNN(nn.Module):
     """
@@ -111,15 +111,28 @@ class CNN(nn.Module):
             Tensor: Output of the model.
         """
         pass
-    
+
+
+def offline_mean_std(dataloader: DataLoader):
+    assert dataloader.batch_size == 1, "offline_mean_std expects batch_size = 1"
+
+    total_r, total_g, total_b, = 0.0, 0.0, 0.0
+    total2_r, total2_g, total2_b, = 0.0, 0.0, 0.0
+
+    for image, _ in dataloader:
+        ...
+
+    pass
+
     
 def calculate_mean_std(**kwargs):
     """
     Fill in the per channel mean and standard deviation of the dataset. 
     Just fill in the values, no need to compute them.
     """
-    print(kwargs)
     # return [mean_r, mean_g, mean_b], [std_r, std_g, std_b]
+
+    return [0, 0 ,0], [0,0,0]
     pass
 
 '''

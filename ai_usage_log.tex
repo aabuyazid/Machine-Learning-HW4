@@ -1,0 +1,65 @@
+% AI usage log for Section 3 of the HW4 write-up.
+% Import directly into your report with:
+%   \input{ai_usage_log.tex}
+% Requires \usepackage{enumitem} if you want to keep the [leftmargin=*] styling below;
+% otherwise just remove that option.
+
+\begin{itemize}[leftmargin=*]
+
+\item \textbf{Directory traversal / dataset indexing.}
+I asked how to enumerate the per-class image folders under \texttt{hw4-data/} and build
+an index of (path, label) pairs for \texttt{SUN397Dataset}. The AI pointed me to
+\texttt{os.listdir}/\texttt{os.walk}/\texttt{os.path.join}/\texttt{sorted()} conceptually
+but did not write the loop. I initially used \texttt{os.walk(dir\_path)} without consuming
+it as a generator (tried to unpack it directly into three names), which the AI caught by
+asking me to reconsider what a generator yields. I also hit a \texttt{NotADirectoryError}
+from \texttt{.DS\_Store} and from checking \texttt{os.path.isfile(dir)} on the wrong
+(un-joined) path; both were my bugs, caught via tracebacks I pasted and the AI's
+clarifying questions, not via AI-written fixes.
+
+\item \textbf{Label encoding.}
+I initially planned to encode labels as one-hot vectors
+(\texttt{np.zeros(n)} with a single 1.0). The AI asked me to check this against the spec
+text ("assigns an integer label") and against how \texttt{nn.CrossEntropyLoss} expects its
+\texttt{target} argument (class index, not one-hot). I changed my design to a single
+integer label based on this.
+
+\item \textbf{PIL / numpy / tensor conversion.}
+I asked for the general syntax to open an image with \texttt{PIL.Image} and convert to a
+numpy array, and about channel ordering (HWC vs CHW). The AI explained
+\texttt{Image.open}, \texttt{.convert("RGB")}, \texttt{np.array(img)}, and pointed out that
+\texttt{torchvision.transforms.ToTensor()} already produces a channel-first tensor,
+without writing my \texttt{\_\_getitem\_\_} implementation. I validated this myself by
+printing \texttt{img\_tensor.shape} against a shape-mismatch test failure
+("314 != 3") I had hit.
+
+\item \textbf{Mean/std computation strategy.}
+I asked how to compute per-channel standard deviation at dataset scale. The AI explained
+the two equivalent formulas ($\sigma = \sqrt{E[(X-\mu)^2]}$ vs
+$\sigma = \sqrt{E[X^2] - (E[X])^2}$) and the single-pass vs two-pass tradeoff, without
+giving me the actual mean/std values for this dataset (those I computed myself and will
+report separately per the assignment's rounding requirement).
+
+\item \textbf{Train/val split and data leakage.}
+I asked whether using the full dataset vs. the train split to compute normalization
+statistics mattered. The AI asked me to reconsider computing stats on \texttt{full\_dataset}
+before splitting versus on \texttt{train\_subset} after splitting via
+\texttt{torch.utils.data.random\_split}. I had initially concluded leakage was
+"inevitable" by computing on the full dataset; after this discussion I changed my design
+to compute statistics only from the training subset, after splitting.
+
+\item \textbf{\texttt{Dataset}/\texttt{DataLoader} API mechanics.}
+General, non-assignment-specific questions about what \texttt{Dataset} provides
+(map-style protocol, \texttt{\_\_len\_\_}/\texttt{\_\_getitem\_\_} contract), how
+\texttt{DataLoader} batches and collates samples, and how \texttt{random\_split}/
+\texttt{Subset} work. These were explained generically (no code specific to my
+\texttt{SUN397Dataset} or class folders was written by the AI).
+
+\item \textbf{Validation performed beyond autograder scoring.}
+For each item above I verified correctness myself by: re-reading the relevant spec
+paragraph and checking my design against its exact wording; running my own code against
+the local test failures/tracebacks and inspecting the actual error messages/shapes
+(e.g. printing \texttt{kwargs}, printing tensor shapes); and reasoning through small
+examples (e.g. what \texttt{os.walk} yields) before writing the corresponding code myself.
+
+\end{itemize}
