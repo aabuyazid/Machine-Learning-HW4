@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+
+# uv / venv
+.venv/
+
+# macOS
+.DS_Store
+
+# Data (large, not meant for version control)
+hw4-data/
+hw4-data.zip
+
+# Trained model weights
+*.pt
+*.pth
+
+# Editors
+.vscode/
+.idea/
