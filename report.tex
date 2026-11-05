@@ -1,0 +1,223 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.9in]{geometry}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{mathtools}
+\usepackage{xcolor}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{mdframed}
+\usepackage[hidelinks]{hyperref}
+\usepackage{listings}
+\usepackage{titlesec}
+\usepackage{tikz}
+\titlespacing*{\section}{0pt}{10pt}{4pt}
+\titlespacing*{\subsection}{0pt}{8pt}{3pt}
+\emergencystretch=2em
+\setlength{\parskip}{3pt}
+\setlist{topsep=2pt,itemsep=1pt,parsep=0pt}
+
+% ---------------------------------------------------------------------------
+% Helpers
+%   \begin{question}...\end{question}  -> the assignment's question, verbatim
+%   \todo{...}                          -> inline marker for what you must write
+%   \answer[hint]                       -> boxed TODO area for your written answer
+%   \maybeimg{file}{width}              -> image, or a placeholder if missing
+% ---------------------------------------------------------------------------
+\newmdenv[
+  linecolor=black!60, linewidth=0.6pt, backgroundcolor=black!4,
+  innermargin=0pt, outermargin=0pt, skipabove=8pt, skipbelow=4pt,
+  innertopmargin=4pt, innerbottommargin=4pt
+]{question}
+
+\newmdenv[
+  linecolor=red!60!black, linewidth=0.6pt, backgroundcolor=red!4,
+  skipabove=4pt, skipbelow=10pt, innertopmargin=6pt, innerbottommargin=6pt
+]{answerbox}
+
+\newcommand{\todo}[1]{{\color{red!70!black}\textbf{[TODO: #1]}}}
+\newcommand{\answer}[1][Write your answer here.]{%
+  \begin{answerbox}\todo{#1}\vspace{2.2em}\end{answerbox}}
+
+\newcommand{\maybeimg}[2]{%
+  \IfFileExists{#1}{\includegraphics[width=#2]{#1}}{%
+    \fbox{\parbox{#2}{\centering\vspace{3em}\todo{missing \detokenize{#1}}\vspace{3em}}}}}
+
+% Verbatim style for the exported prompts (Section 2.1)
+\lstdefinestyle{prompt}{
+  basicstyle=\ttfamily\scriptsize, breaklines=true, breakatwhitespace=false,
+  columns=fullflexible, keepspaces=true, frame=single, rulecolor=\color{black!30},
+  backgroundcolor=\color{black!3}, xleftmargin=0pt, aboveskip=2pt, belowskip=2pt
+}
+
+\title{Homework 4: CNN}
+\author{Arkan Abuyazid \\ CSCE 633: Machine Learning}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+% ===========================================================================
+\section{Math Question: Convolution Operation}
+\label{sec:math}
+
+\begin{question}
+Perform convolution using the following matrix and filter, show your steps, and report your
+results.
+
+Input matrix (7 by 7), outer ring of zeros is zero-padding, interior 5 by 5 region is the active
+data:
+\[
+\begin{pmatrix}
+0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 2 & 4 & 1 & 0 & 0 \\
+0 & 3 & 1 & 1 & 0 & 1 & 0 \\
+0 & 2 & 4 & 1 & 0 & 1 & 0 \\
+0 & 2 & 0 & 5 & 2 & 2 & 0 \\
+0 & 0 & 1 & 3 & 2 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0
+\end{pmatrix}
+\]
+Filter (3 by 3):
+\[
+\begin{pmatrix}
+1 & 0 & -1 \\
+1 & 0 & -1 \\
+1 & 0 & -1
+\end{pmatrix}
+\]
+Apply the convolution operation for all the following settings respectively and report your
+results. Max pooling parameters (when used) are always Pool size: 3 by 3; Stride: 2.
+\end{question}
+
+\subsection{1.1 Without max pooling, convolution stride of 1}
+\label{sec:q1-1}
+\begin{question}
+Calculate and report the dimensions of the output matrix and the complete output matrix. Show
+your work.
+\end{question}
+
+\textbf{Output dimensions.} With input size $7\times7$, filter size $3\times3$, and stride $1$,
+\[
+O = \frac{N-F}{S}+1 = \frac{7-3}{1}+1 = 5.
+\]
+So the output is $5\times5$.
+
+\textbf{Computation.} Since the middle column of the filter is all zeros, each output entry is
+simply (sum of the left column of the $3\times3$ window) $-$ (sum of the right column of the
+window):
+\[
+\text{out}(i,j) = \sum_{k=0}^{2} I(i+k,\,j) \;-\; \sum_{k=0}^{2} I(i+k,\,j+2),
+\]
+with $i,j = 0,\dots,4$ (0-indexed, top-left corner of the sliding window on the padded $7\times7$
+input). Sliding the window across all 25 positions gives:
+\[
+\begin{pmatrix}
+-3 & -2 &  2 &  4 &  1 \\
+-7 & -1 &  6 &  4 &  1 \\
+-5 &  0 &  3 &  3 &  2 \\
+-5 & -5 &  1 &  5 &  4 \\
+-1 & -6 & -3 &  5 &  4
+\end{pmatrix}
+\]
+
+\subsection{1.2 Without max pooling, convolution stride of 2}
+\label{sec:q1-2}
+\begin{question}
+Calculate and report the dimensions of the output matrix and the complete output matrix. Show
+your work.
+\end{question}
+
+\textbf{Output dimensions.} With $N=7$, $F=3$, $S=2$,
+\[
+O = \left\lfloor\frac{N-F}{S}\right\rfloor+1 = \left\lfloor\frac{7-3}{2}\right\rfloor+1 = 3.
+\]
+So the output is $3\times3$.
+
+\textbf{Computation.} This uses the same window values as in \ref{sec:q1-1}, but now only the
+windows whose top-left corner is at $i,j \in \{0,2,4\}$ are kept (every other row/column of the
+stride-1 result):
+\[
+\begin{pmatrix}
+-3 &  2 &  1 \\
+-5 &  3 &  2 \\
+-1 & -3 &  4
+\end{pmatrix}
+\]
+
+\subsection{1.3 With max pooling, convolution stride of 1}
+\label{sec:q1-3}
+\begin{question}
+Calculate and report the dimensions of the output matrix and the complete output matrix. Show
+your work.
+\end{question}
+
+\textbf{Convolution stage.} The stride-1 convolution output is the same $5\times5$ matrix computed
+in \ref{sec:q1-1}:
+\[
+\begin{pmatrix}
+-3 & -2 &  2 &  4 &  1 \\
+-7 & -1 &  6 &  4 &  1 \\
+-5 &  0 &  3 &  3 &  2 \\
+-5 & -5 &  1 &  5 &  4 \\
+-1 & -6 & -3 &  5 &  4
+\end{pmatrix}
+\]
+
+\textbf{Pooling output dimensions.} With a $3\times3$ pool, stride $2$, over the $5\times5$
+convolution output:
+\[
+O = \left\lfloor\frac{5-3}{2}\right\rfloor+1 = 2.
+\]
+So the pooled output is $2\times2$.
+
+\textbf{Pooling computation.} The four $3\times3$ pooling windows (top-left corners at
+$i,j\in\{0,2\}$) are:
+\[
+\begin{pmatrix}-3&-2&2\\-7&-1&6\\-5&0&3\end{pmatrix}\!\to\!\max=6,\qquad
+\begin{pmatrix}2&4&1\\6&4&1\\3&3&2\end{pmatrix}\!\to\!\max=6,
+\]
+\[
+\begin{pmatrix}-5&0&3\\-5&-5&1\\-1&-6&-3\end{pmatrix}\!\to\!\max=3,\qquad
+\begin{pmatrix}3&3&2\\1&5&4\\-3&5&4\end{pmatrix}\!\to\!\max=5.
+\]
+Giving the final $2\times2$ result:
+\[
+\begin{pmatrix}
+6 & 6 \\
+3 & 5
+\end{pmatrix}
+\]
+
+% ===========================================================================
+\section{Use of AI and External Resources}
+\label{sec:ai}
+
+\begin{question}
+The purpose of this section is to cite the external resources you used in creating your homework.
+In particular, if you use any generative AI tools to help generate your code you should then
+explain:
+1. What were the prompts you provided the AI tools?
+2. What mistakes did you catch the AI making?
+3. What did you do to validate the correctness of the AI generated portions, aside from relying on
+Gradescope Autograder scoring?
+\end{question}
+
+\subsection{Prompts provided to AI tools}
+\label{sec:ai-prompts}
+
+\input{img/ai_prompts.tex}
+
+\subsection{Mistakes caught, and validation performed beyond autograder scoring}
+\label{sec:ai-log}
+
+I did not catch any mistakes.
+
+
+\subsection{External help and references}
+\label{sec:ai-external}
+None
+
+\end{document}
